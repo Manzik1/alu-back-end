@@ -2,7 +2,7 @@
 """
 This module exports all employees' tasks to a single JSON file.
 
-The JSON file format must be:
+The JSON output format must be:
 {
     "USER_ID": [
         {
@@ -17,7 +17,10 @@ The JSON file format must be:
     ]
 }
 
-The file name is: todo_all_employees.json
+All users must appear in the output.
+All tasks must be included and assigned to the correct user IDs.
+
+The output file is: todo_all_employees.json
 """
 
 import json
@@ -26,27 +29,29 @@ import requests
 
 if __name__ == "__main__":
 
-    # Fetch all users
+    # Endpoints
     users_url = "https://jsonplaceholder.typicode.com/users"
     todos_url = "https://jsonplaceholder.typicode.com/todos"
 
+    # Fetch all users and todos
     users = requests.get(users_url).json()
     todos = requests.get(todos_url).json()
 
-    # Dictionary to store all data
+    # Output dictionary
     all_data = {}
 
-    # Build JSON structure
+    # Create entry for every user (requirement: ALL users exist in output)
     for user in users:
         user_id = user.get("id")
         username = user.get("username")
 
-        # List for this user's tasks
-        user_tasks = []
+        # Create an empty list for their tasks
+        all_data[str(user_id)] = []
 
+        # Assign all tasks belonging to this user (requirement: ALL tasks included)
         for todo in todos:
             if todo.get("userId") == user_id:
-                user_tasks.append(
+                all_data[str(user_id)].append(
                     {
                         "username": username,
                         "task": todo.get("title"),
@@ -54,11 +59,6 @@ if __name__ == "__main__":
                     }
                 )
 
-        all_data[str(user_id)] = user_tasks
-
     # Write to file
-    file_name = "todo_all_employees.json"
-    with open(file_name, "w", encoding="utf-8") as f:
-        json.dump(all_data, f)
-
-    print("JSON file '{}' created.".format(file_name))
+    with open("todo_all_employees.json", "w", encoding="utf-8") as file:
+        json.dump(all_data, file)
