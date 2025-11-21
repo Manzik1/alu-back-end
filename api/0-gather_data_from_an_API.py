@@ -1,17 +1,38 @@
 #!/usr/bin/python3
+
+"""Import libraries"""
+
 import requests
 import sys
 
+
+"""Import libraries"""
+
 if __name__ == "__main__":
-    emp_id = sys.argv[1]
+    user_id = int(sys.argv[1])
+    todos_url = "https://jsonplaceholder.typicode.com/todos"
+    users_url = "https://jsonplaceholder.typicode.com/users/{}".format(user_id)
 
-    user = requests.get("https://jsonplaceholder.typicode.com/users/{}".format(emp_id)).json()
-    todos = requests.get("https://jsonplaceholder.typicode.com/todos?userId={}".format(emp_id)).json()
+    todo_data = requests.get(todos_url).json()
 
-    name = user.get("name")
-    done_tasks = [t for t in todos if t.get("completed")]
+    employee_name = requests.get(users_url).json()["name"]
 
-    print("Employee {} is done with tasks({}/{}):".format(name, len(done_tasks), len(todos)))
+    total_user_todos = 0
+    completed_todos = 0
+    titles = []
+    for todo in todo_data:
+        # Check if user_id is the same input as parameter
+        if user_id == todo["userId"]:
+            # Get the total number of todos
+            total_user_todos += 1
+            # Get the total number of completed tasks
+            if todo["completed"]:
+                completed_todos += 1
+                # Get the titles of the completed tasks
+                titles.append(todo["title"])
 
-    for task in done_tasks:
-        print("\t {}".format(task.get("title")))
+    print("Employee {} is done with tasks({}/{}):"
+          .format(employee_name, completed_todos, total_user_todos))
+
+    for title in titles:
+        print("\t {}".format(title))
